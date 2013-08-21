@@ -1,0 +1,11 @@
+This is a set of statusbar programs for use with wmii.
+
+They use libixp to communicate with wmii.
+
+There is an upower-based battery monitor and a clock
+that also includes a cpu and memory monitor.
+
+Being not more than a personal hack you can expect to
+have to configure stuff in the source.
+
+Note the GPLv2 license in COPYING.

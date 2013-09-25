@@ -34,7 +34,7 @@ static void proc_stat_read_n(char *str, uint64_t *out, int count) {
 int proc_stat_read(struct proc_stat *ps) {
     int ret = 0;
     FILE *fp;
-    char buf[256];
+    char buf[8192];
     memset((void*)ps, 0, sizeof(*ps));
     fp = fopen("/proc/stat", "r");
     if(fp == NULL) {

@@ -1,0 +1,4 @@
+*.o
+*~
+wmii-clock
+wmii-upower

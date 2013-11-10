@@ -10,13 +10,12 @@
 #include <upower.h>
 
 #include "colors.h"
+#include "signals.h"
 #include "statusbar.h"
 
 #define MAX_BATTERIES 2
 
 GMainLoop *mainloop;
-
-static gboolean opt_monitor_detail = TRUE;
 
 struct sb sb;
 
@@ -185,32 +184,17 @@ static void changed_cb (UpClient *client, gpointer user_data)
     update_sb(client);
 }
 
-void handler(int sig) {
+void quit_handler(int sig) {
     g_main_loop_quit(mainloop);
 }
 
 int
 main(int argc, char **argv) {
     int i;
-    void *sh;
     UpClient *upclient;
     IxpClient *client;
 
-    sh = signal(SIGINT, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
-    sh = signal(SIGABRT, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
-    sh = signal(SIGTERM, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
+    signals_setup(&quit_handler);
 
     client = ixp_nsmount("wmii");
     if(client == NULL) {
@@ -240,4 +224,6 @@ main(int argc, char **argv) {
     g_main_loop_run(mainloop);
 
     sb_finish(&sb);
+
+    ixp_unmount(client);
 }

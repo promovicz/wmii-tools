@@ -43,6 +43,7 @@
 
 #include "colors.h"
 #include "proc.h"
+#include "signals.h"
 #include "statusbar.h"
 
 #define MAX_EVENTS 10
@@ -180,7 +181,7 @@ void update_memory(struct sb_entry *sbe) {
 
 volatile int should_quit = 0;
 
-void handler(int sig) {
+void quit_handler(int sig) {
     should_quit = 1;
 }
 
@@ -194,29 +195,7 @@ main(int argc, char **argv) {
     IxpClient* client;
     struct sb sb;
 
-    sh = signal(SIGINT, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
-    sh = signal(SIGABRT, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
-    sh = signal(SIGTERM, &handler);
-    if(sh == SIG_ERR) {
-        perror("signal");
-        abort();
-    }
-
-    struct sb_entry sbe_clock = {
-        .sbe_path = "/rbar/90_clock",
-        .sbe_update = &update_clock,
-        .sbe_foreground = 0xbbbbbb,
-        .sbe_background = 0x444444,
-        .sbe_border     = 0x555555,
-    };
+    signals_setup(&quit_handler);
 
     struct sb_entry sbe_memory = {
         .sbe_path = "/rbar/70_memory",
@@ -230,6 +209,14 @@ main(int argc, char **argv) {
         .sbe_path = "/rbar/71_cpu",
         .sbe_init = &init_cpu,
         .sbe_update = &update_cpu,
+        .sbe_foreground = 0xbbbbbb,
+        .sbe_background = 0x444444,
+        .sbe_border     = 0x555555,
+    };
+
+    struct sb_entry sbe_clock = {
+        .sbe_path = "/rbar/90_clock",
+        .sbe_update = &update_clock,
         .sbe_foreground = 0xbbbbbb,
         .sbe_background = 0x444444,
         .sbe_border     = 0x555555,
@@ -304,6 +291,8 @@ main(int argc, char **argv) {
     }
 
     sb_finish(&sb);
+
+    ixp_unmount(client);
 
     return 0;
 }
